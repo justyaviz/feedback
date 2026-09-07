@@ -74,3 +74,7 @@ App service Variables:
 - `SESSION_SECRET`
 
 Railway repo'ni qayta deploy qilganda `railway.toml` Dockerfile builder'ni tanlaydi.
+
+
+## v2.2
+Oldingi GitHub revisionidan qolgan `lib/supabase.ts` ham dependency-siz stub bilan overwrite qilinadi. Asosiy database faqat Railway PostgreSQL.

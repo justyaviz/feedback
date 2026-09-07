@@ -15,9 +15,6 @@ export function db() {
   if (!pool) {
     pool = new Pool({
       connectionString: getDatabaseUrl(),
-      ssl: process.env.NODE_ENV === "production"
-        ? { rejectUnauthorized: false }
-        : undefined,
       max: 10,
       idleTimeoutMillis: 30000
     });
