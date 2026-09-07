@@ -1,8 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSupabase } from "../../../lib/supabase";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -11,44 +10,28 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const supabase = await getSupabase();
-        const { data } = await supabase.auth.getSession();
-        if (mounted && data.session) router.replace("/admin");
-      } catch {
-        // Login form itself should still render if runtime env is not configured yet.
-      }
-    })();
-    return () => { mounted = false; };
-  }, [router]);
-
   async function submit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    let supabase;
     try {
-      supabase = await getSupabase();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Database konfiguratsiyasi topilmadi.");
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Kirishda xatolik");
+
+      router.replace("/admin");
+      router.refresh();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Kirishda xatolik.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      setError("Email yoki parol noto‘g‘ri.");
-      setLoading(false);
-      return;
-    }
-
-    router.replace("/admin");
-    router.refresh();
   }
 
   return (
@@ -65,11 +48,13 @@ export default function AdminLoginPage() {
         <form onSubmit={submit}>
           <label>
             Email
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input type="email" value={email}
+              onChange={(e) => setEmail(e.target.value)} required />
           </label>
           <label>
             Parol
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input type="password" value={password}
+              onChange={(e) => setPassword(e.target.value)} required />
           </label>
           {error && <div className="form-message error">{error}</div>}
           <button className="primary-btn" disabled={loading}>

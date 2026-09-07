@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSupabase } from "../lib/supabase";
 import type { FeedbackResponse } from "../lib/types";
 
 function countList(rows: FeedbackResponse[], key: "liked_activities" | "best_channels" | "needed_help") {
@@ -47,36 +46,32 @@ export default function AdminDashboard() {
   const [rows, setRows] = useState<FeedbackResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [branch, setBranch] = useState("Barchasi");
+  const [error, setError] = useState("");
 
   async function load() {
     setLoading(true);
-    let supabase;
+    setError("");
+
     try {
-      supabase = await getSupabase();
-    } catch {
-      router.replace("/admin/login");
+      const response = await fetch("/api/admin/responses", { cache: "no-store" });
+
+      if (response.status === 401) {
+        router.replace("/admin/login");
+        return;
+      }
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Ma’lumotlarni olib bo‘lmadi.");
+
+      setRows((data.rows || []) as FeedbackResponse[]);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Server xatosi.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      router.replace("/admin/login");
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("feedback_responses")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (!error) setRows((data || []) as FeedbackResponse[]);
-    setLoading(false);
   }
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const branches = useMemo(
     () => ["Barchasi", ...Array.from(new Set(rows.map((r) => r.branch))).sort()],
@@ -106,8 +101,7 @@ export default function AdminDashboard() {
   const maxChannel = Math.max(1, ...topChannels.map((x) => x[1]));
 
   async function logout() {
-    const supabase = await getSupabase();
-    await supabase.auth.signOut();
+    await fetch("/api/admin/logout", { method: "POST" });
     router.replace("/admin/login");
   }
 
@@ -140,31 +134,18 @@ export default function AdminDashboard() {
         </div>
       </section>
 
+      {error && <div className="form-message error">{error}</div>}
+
       <section className="kpi-grid">
-        <div className="kpi-card">
-          <span>Jami javob</span>
-          <strong>{filtered.length}</strong>
-        </div>
-        <div className="kpi-card">
-          <span>O‘rtacha baho</span>
-          <strong>{avgScore}<small>/10</small></strong>
-        </div>
-        <div className="kpi-card">
-          <span>Yordam yetarli</span>
-          <strong>{support.Ha}</strong>
-        </div>
-        <div className="kpi-card">
-          <span>Yordam yetarli emas</span>
-          <strong>{support["Yo‘q"]}</strong>
-        </div>
+        <div className="kpi-card"><span>Jami javob</span><strong>{filtered.length}</strong></div>
+        <div className="kpi-card"><span>O‘rtacha baho</span><strong>{avgScore}<small>/10</small></strong></div>
+        <div className="kpi-card"><span>Yordam yetarli</span><strong>{support.Ha}</strong></div>
+        <div className="kpi-card"><span>Yordam yetarli emas</span><strong>{support["Yo‘q"]}</strong></div>
       </section>
 
       <section className="chart-grid">
         <div className="panel">
-          <div className="panel-head">
-            <h3>Eng ko‘p so‘ralgan marketing yordami</h3>
-            <span>{branch}</span>
-          </div>
+          <div className="panel-head"><h3>Eng ko‘p so‘ralgan marketing yordami</h3><span>{branch}</span></div>
           <div className="bars">
             {topHelp.length ? topHelp.map(([label, value]) => (
               <div className="bar-item" key={label}>
@@ -176,10 +157,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="panel">
-          <div className="panel-head">
-            <h3>Eng samarali deb hisoblangan kanallar</h3>
-            <span>{branch}</span>
-          </div>
+          <div className="panel-head"><h3>Eng samarali deb hisoblangan kanallar</h3><span>{branch}</span></div>
           <div className="bars">
             {topChannels.length ? topChannels.map(([label, value]) => (
               <div className="bar-item" key={label}>
@@ -192,22 +170,13 @@ export default function AdminDashboard() {
       </section>
 
       <section className="panel">
-        <div className="panel-head">
-          <h3>Oxirgi javoblar</h3>
-          <span>{filtered.length} ta</span>
-        </div>
-
+        <div className="panel-head"><h3>Oxirgi javoblar</h3><span>{filtered.length} ta</span></div>
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Filial</th>
-                <th>Lavozim</th>
-                <th>Baho</th>
-                <th>Yordam</th>
-                <th>Eng katta kamchilik</th>
-                <th>Bizdan kutgan yordami</th>
-                <th>Sana</th>
+                <th>Filial</th><th>Lavozim</th><th>Baho</th><th>Yordam</th>
+                <th>Eng katta kamchilik</th><th>Bizdan kutgan yordami</th><th>Sana</th>
               </tr>
             </thead>
             <tbody>
