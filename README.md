@@ -1,103 +1,72 @@
-# ALOO Marketing Feedback — Railway PostgreSQL edition
+# ALOO Marketing Feedback v3 PRO
 
-Bu versiyada **Supabase butunlay olib tashlangan**.
+Railway + Railway PostgreSQL uchun production-ready feedback va admin statistikasi.
 
-## Ishlatiladigan servislar
+## Stack
 
-- Next.js — sayt va admin
-- Railway — hosting
-- Railway PostgreSQL — barcha survey javoblari
-- GitHub — kod
+- Next.js 14
+- Railway
+- Railway PostgreSQL
+- Dockerfile deploy
+- Custom admin auth
+- Supabase yo‘q
+
+## URL'lar
+
+- `/` — anonim filial so‘rovnomasi
+- `/admin/login` — admin login
+- `/admin` — dashboard
+- `/health` — Railway healthcheck
+- `/api/health` — app health
+- `/api/health/db` — PostgreSQL diagnostika
 
 ## Railway Variables
 
-App service ichida quyidagi 4 ta variable bo‘lishi kerak:
-
 ```env
-DATABASE_URL=Railway PostgreSQL connection URL
+DATABASE_URL=${{Postgres.DATABASE_URL}}
 ADMIN_EMAIL=marketing@aloo.uz
 ADMIN_PASSWORD=KUCHLI_PAROL
-SESSION_SECRET=UZUN_TASODIFIY_SECRET
+SESSION_SECRET=KAMIDA_32_BELGILI_MAXFIY_KOD
+DB_SSL=false
+DB_POOL_MAX=10
 ```
 
-Railway PostgreSQL service'dagi `DATABASE_URL` ni web/app service'ga **Reference** qilib ulang.
+`DATABASE_URL` ni Railway PostgreSQL service'dan Reference Variable qilib ulang.
 
-Masalan Railway Variables UI orqali:
-- New Variable / Add Reference
-- PostgreSQL service
-- `DATABASE_URL`
+## Kuchaytirilgan joylar
 
-`SESSION_SECRET` uchun kamida 32+ belgili tasodifiy matn ishlating.
+- healthcheck DB'dan mustaqil
+- alohida DB diagnostika endpoint
+- PostgreSQL connection retry
+- configurable connection pool
+- schema avtomatik yaratiladi
+- admin session HMAC bilan imzolanadi
+- HttpOnly cookie
+- login rate limit
+- survey spam rate limit
+- honeypot bot himoyasi
+- security headers
+- CSV export
+- filial filter
+- admin dashboard
+- Supabase dependency butunlay yo‘q
 
-## Database jadvali
+## Railway deploy
 
-Alohida migration shart emas.
+1. GitHub'ga barcha fayllarni push qiling.
+2. Railway app service'ni repo bilan ulang.
+3. PostgreSQL service yarating yoki mavjudini ishlating.
+4. App Variables'ga yuqoridagi qiymatlarni kiriting.
+5. `DATABASE_URL` ni Postgres service'dan Reference qiling.
+6. Redeploy.
 
-Birinchi survey yuborilganda yoki admin ma'lumotni ochganda sayt `feedback_responses` jadvalini avtomatik yaratadi.
+Railway healthcheck path: `/health`
 
-`sql/schema.sql` faqat qo‘lda yaratmoqchi bo‘lsangiz qo‘shilgan.
+## Diagnostika
 
-## URL
+Deploy'dan keyin:
 
-- `/` — anonim so‘rovnoma
-- `/admin/login` — admin login
-- `/admin` — statistika
-- admin ichida CSV eksport mavjud
+- `https://DOMAIN/health` → app ishlayaptimi
+- `https://DOMAIN/api/health/db` → database ishlayaptimi
 
-## Deploy
-
-```bash
-npm install
-npm run build
-npm start
-```
-
-Railway uchun `railway.toml` tayyor.
-
-## Muhim
-
-Bu loyiha uchun endi:
-- SUPABASE_URL kerak emas
-- SUPABASE_ANON_KEY kerak emas
-- Supabase account kerak emas
-
-
-## Railway build fix v2.1
-
-Bu paket Railway'da Nixpacks o'rniga to'g'ridan-to'g'ri `Dockerfile` builder ishlatadi.
-Shuning uchun `UndefinedVar: $NIXPACKS_PATH` kabi Nixpacks generated Dockerfile warninglari chetlab o'tiladi.
-
-App service Variables:
-- `DATABASE_URL` -> Railway PostgreSQL service'dan reference
-- `ADMIN_EMAIL`
-- `ADMIN_PASSWORD`
-- `SESSION_SECRET`
-
-Railway repo'ni qayta deploy qilganda `railway.toml` Dockerfile builder'ni tanlaydi.
-
-
-## v2.2
-Oldingi GitHub revisionidan qolgan `lib/supabase.ts` ham dependency-siz stub bilan overwrite qilinadi. Asosiy database faqat Railway PostgreSQL.
-
-
-## v2.3 Railway Healthcheck fix
-
-Railway healthcheck endi `/` sahifani emas, DB va auth'dan mutlaqo mustaqil `/api/health` endpointni tekshiradi.
-
-Railway app service Variables:
-- `DATABASE_URL` — PostgreSQL service'dan reference
-- `ADMIN_EMAIL`
-- `ADMIN_PASSWORD`
-- `SESSION_SECRET`
-
-App `0.0.0.0` host va Railway bergan `PORT` bilan ishga tushadi.
-
-
-## v2.4 dual healthcheck
-
-Railway UI hozir `/health` ni tekshirayotgan bo‘lsa ham deploy yiqilmasligi uchun ikkala endpoint mavjud:
-
-- `/health`
-- `/api/health`
-
-Railway config default sifatida `/health` ni ishlatadi.
+`/health` 200 qaytib, `/api/health/db` 503 qaytarsa, muammo faqat `DATABASE_URL` yoki PostgreSQL ulanishida.

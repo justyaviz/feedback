@@ -38,13 +38,14 @@ type FormData = {
   plus_feedback: string;
   minus_feedback: string;
   exact_help: string;
+  website: string;
 };
 
 const initial: FormData = {
   branch: "", role: "", marketing_score: 8, liked_activities: [],
   biggest_problem: "", best_channels: [], support_level: "",
   needed_help: [], customer_feedback: "", competitor_idea: "",
-  one_action: "", plus_feedback: "", minus_feedback: "", exact_help: ""
+  one_action: "", plus_feedback: "", minus_feedback: "", exact_help: "", website: ""
 };
 
 function CheckboxGroup({
@@ -230,6 +231,18 @@ export default function SurveyForm() {
             required placeholder="Bu savol biz uchun eng muhim..." />
         </label>
       </section>
+
+      <div className="hp-field" aria-hidden="true">
+        <label>
+          Website
+          <input
+            tabIndex={-1}
+            autoComplete="off"
+            value={form.website}
+            onChange={(e) => set("website", e.target.value)}
+          />
+        </label>
+      </div>
 
       <div className="submit-wrap">
         <button className="primary-btn" disabled={!canSubmit || status === "loading"}>

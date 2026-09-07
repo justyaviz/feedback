@@ -65,3 +65,5 @@ input[type="range"]{padding:0;accent-color:var(--blue)}
 th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.wide-cell{min-width:260px;max-width:360px;color:#475467;line-height:1.5}.empty,.loading-box{color:var(--muted);text-align:center;padding:30px}
 @media(max-width:860px){.check-grid,.two-col,.chart-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr 1fr}.hero{margin-top:40px;padding:28px}.form-card{padding:24px}.admin-top{align-items:flex-start}}
 @media(max-width:560px){.page-shell,.admin-shell{width:min(100% - 20px,100%)}.brand-header{align-items:flex-start}.header-pill{display:none}.hero h1{letter-spacing:-2px}.kpi-grid{grid-template-columns:1fr}.admin-top{position:static;flex-direction:column}.admin-actions{width:100%}.admin-actions select{width:100%}}
+
+.hp-field{position:absolute!important;left:-99999px!important;width:1px!important;height:1px!important;overflow:hidden!important}

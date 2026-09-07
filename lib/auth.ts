@@ -6,7 +6,9 @@ const MAX_AGE_SECONDS = 60 * 60 * 12;
 
 function secret() {
   const value = process.env.SESSION_SECRET;
-  if (!value) throw new Error("SESSION_SECRET is not configured.");
+  if (!value || value.length < 32) {
+    throw new Error("SESSION_SECRET must be at least 32 characters.");
+  }
   return value;
 }
 
@@ -17,7 +19,8 @@ function sign(value: string) {
 export function createSessionToken(email: string) {
   const payload = Buffer.from(JSON.stringify({
     email,
-    exp: Date.now() + MAX_AGE_SECONDS * 1000
+    exp: Date.now() + MAX_AGE_SECONDS * 1000,
+    nonce: crypto.randomBytes(12).toString("hex")
   })).toString("base64url");
 
   return `${payload}.${sign(payload)}`;
@@ -31,6 +34,7 @@ export function verifySessionToken(token?: string | null) {
   const expected = sign(payload);
   const a = Buffer.from(signature);
   const b = Buffer.from(expected);
+
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return false;
 
   try {
@@ -42,7 +46,11 @@ export function verifySessionToken(token?: string | null) {
 }
 
 export function isAdminRequest() {
-  return verifySessionToken(cookies().get(COOKIE_NAME)?.value);
+  try {
+    return verifySessionToken(cookies().get(COOKIE_NAME)?.value);
+  } catch {
+    return false;
+  }
 }
 
 export const authCookie = {

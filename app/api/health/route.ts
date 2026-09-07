@@ -5,7 +5,19 @@ export const runtime = "nodejs";
 
 export async function GET() {
   return NextResponse.json(
-    { ok: true, service: "aloo-feedback", status: "healthy" },
-    { status: 200, headers: { "Cache-Control": "no-store" } }
+    {
+      ok: true,
+      service: "aloo-feedback",
+      status: "healthy",
+      version: "3.0.0",
+      time: new Date().toISOString()
+    },
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff"
+      }
+    }
   );
 }
