@@ -60,3 +60,17 @@ Bu loyiha uchun endi:
 - SUPABASE_URL kerak emas
 - SUPABASE_ANON_KEY kerak emas
 - Supabase account kerak emas
+
+
+## Railway build fix v2.1
+
+Bu paket Railway'da Nixpacks o'rniga to'g'ridan-to'g'ri `Dockerfile` builder ishlatadi.
+Shuning uchun `UndefinedVar: $NIXPACKS_PATH` kabi Nixpacks generated Dockerfile warninglari chetlab o'tiladi.
+
+App service Variables:
+- `DATABASE_URL` -> Railway PostgreSQL service'dan reference
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `SESSION_SECRET`
+
+Railway repo'ni qayta deploy qilganda `railway.toml` Dockerfile builder'ni tanlaydi.
