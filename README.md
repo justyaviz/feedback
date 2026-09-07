@@ -78,3 +78,16 @@ Railway repo'ni qayta deploy qilganda `railway.toml` Dockerfile builder'ni tanla
 
 ## v2.2
 Oldingi GitHub revisionidan qolgan `lib/supabase.ts` ham dependency-siz stub bilan overwrite qilinadi. Asosiy database faqat Railway PostgreSQL.
+
+
+## v2.3 Railway Healthcheck fix
+
+Railway healthcheck endi `/` sahifani emas, DB va auth'dan mutlaqo mustaqil `/api/health` endpointni tekshiradi.
+
+Railway app service Variables:
+- `DATABASE_URL` — PostgreSQL service'dan reference
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `SESSION_SECRET`
+
+App `0.0.0.0` host va Railway bergan `PORT` bilan ishga tushadi.

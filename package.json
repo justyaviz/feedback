@@ -1,11 +1,11 @@
 {
   "name": "aloo-marketing-feedback",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -H 0.0.0.0 -p ${PORT:-3000}"
   },
   "engines": {
     "node": ">=20 <23"
