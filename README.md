@@ -110,3 +110,20 @@ font-family: Gilroy, Inter, system-ui, sans-serif;
 ```
 
 GitHub repo ichiga litsenziyalangan Gilroy webfontingizni o‘zingiz qo‘shishingiz mumkin. Font fayli bu paketga kiritilmagan.
+
+
+## Railway
+
+Repository'ni Railway'ga ulang va Environment Variables sifatida quyidagilarni kiriting:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+```
+
+`railway.toml` tayyor:
+- Build: `npm run build`
+- Start: `npm start`
+- Healthcheck: `/`
+
+Ushbu v1.0.1 versiyada Railway build'dagi `MapIterator` / TypeScript ES5 xatosi tuzatilgan.

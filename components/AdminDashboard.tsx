@@ -10,7 +10,7 @@ function countList(rows: FeedbackResponse[], key: "liked_activities" | "best_cha
   rows.forEach((r) => {
     (r[key] || []).forEach((item) => map.set(item, (map.get(item) || 0) + 1));
   });
-  return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
 }
 
 function exportCSV(rows: FeedbackResponse[]) {
