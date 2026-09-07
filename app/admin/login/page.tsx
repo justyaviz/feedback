@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../lib/supabase";
+import { getSupabase } from "../../../lib/supabase";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -12,15 +12,32 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace("/admin");
-    });
+    let mounted = true;
+    (async () => {
+      try {
+        const supabase = await getSupabase();
+        const { data } = await supabase.auth.getSession();
+        if (mounted && data.session) router.replace("/admin");
+      } catch {
+        // Login form itself should still render if runtime env is not configured yet.
+      }
+    })();
+    return () => { mounted = false; };
   }, [router]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    let supabase;
+    try {
+      supabase = await getSupabase();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Database konfiguratsiyasi topilmadi.");
+      setLoading(false);
+      return;
+    }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 

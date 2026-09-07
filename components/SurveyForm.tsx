@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { getSupabase } from "../lib/supabase";
 
 const roles = ["Filial rahbari", "Sotuvchi", "Kassir", "Administrator", "Boshqa"];
 
@@ -124,6 +124,15 @@ export default function SurveyForm() {
 
     setStatus("loading");
     setMessage("");
+
+    let supabase;
+    try {
+      supabase = await getSupabase();
+    } catch (err) {
+      setStatus("error");
+      setMessage(err instanceof Error ? err.message : "Database konfiguratsiyasi topilmadi.");
+      return;
+    }
 
     const { error } = await supabase.from("feedback_responses").insert({
       ...form,

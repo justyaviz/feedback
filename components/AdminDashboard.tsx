@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../lib/supabase";
+import { getSupabase } from "../lib/supabase";
 import type { FeedbackResponse } from "../lib/types";
 
 function countList(rows: FeedbackResponse[], key: "liked_activities" | "best_channels" | "needed_help") {
@@ -50,6 +50,15 @@ export default function AdminDashboard() {
 
   async function load() {
     setLoading(true);
+    let supabase;
+    try {
+      supabase = await getSupabase();
+    } catch {
+      router.replace("/admin/login");
+      setLoading(false);
+      return;
+    }
+
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       router.replace("/admin/login");
@@ -97,6 +106,7 @@ export default function AdminDashboard() {
   const maxChannel = Math.max(1, ...topChannels.map((x) => x[1]));
 
   async function logout() {
+    const supabase = await getSupabase();
     await supabase.auth.signOut();
     router.replace("/admin/login");
   }
