@@ -91,3 +91,13 @@ Railway app service Variables:
 - `SESSION_SECRET`
 
 App `0.0.0.0` host va Railway bergan `PORT` bilan ishga tushadi.
+
+
+## v2.4 dual healthcheck
+
+Railway UI hozir `/health` ni tekshirayotgan bo‘lsa ham deploy yiqilmasligi uchun ikkala endpoint mavjud:
+
+- `/health`
+- `/api/health`
+
+Railway config default sifatida `/health` ni ishlatadi.
